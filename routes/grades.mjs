@@ -72,7 +72,7 @@ router.delete("/:id", async (req, res) => {
     })
   } catch(error) {
       console.log(error);
-      res.send({error: 'Error, invalid data'})
+      res.send({error: 'Error, invalid data'}).status(404)
   }
 });
 
@@ -83,16 +83,26 @@ router.get("/student/:id", async (req, res) => {
 
 // Get a learner's grade data
 router.get("/learner/:id", async (req, res) => {
-  let collection = await db.collection("grades");
-  let query = { learner_id: Number(req.params.id) };
+  
+  try {
+    const query = { learner_id: req.params.id }
+    const learner = await Grades.find(query)
+    res.send(learner).status(200)
+  } catch (error) {
+    res.send({error: 'Error, invalid data'}).status(404)
+  }
 
-  // Check for class_id parameter
-  if (req.query.class) query.class_id = Number(req.query.class);
 
-  let result = await collection.find(query).toArray();
+  // let collection = await db.collection("grades");
+  // let query = { learner_id: Number(req.params.id) };
 
-  if (!result) res.send("Not found").status(404);
-  else res.send(result).status(200);
+  // // Check for class_id parameter
+  // if (req.query.class) query.class_id = Number(req.query.class);
+
+  // let result = await collection.find(query).toArray();
+
+  // if (!result) res.send("Not found").status(404);
+  // else res.send(result).status(200);
 });
 
 // Delete a learner's grade data
