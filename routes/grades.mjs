@@ -1,6 +1,6 @@
 import express from "express";
-import db from "../db/conn.mjs";
-import { ObjectId } from "mongodb";
+import Grades from '../models/Grades.mjs'
+
 
 const router = express.Router();
 
@@ -21,12 +21,16 @@ router.post("/", async (req, res) => {
 
 // Get a single grade entry
 router.get("/:id", async (req, res) => {
-  let collection = await db.collection("grades");
-  let query = { _id: new ObjectId(req.params.id) };
-  let result = await collection.findOne(query);
+  try {
+    const grades = await Grades.findById(req.params.id)
+    console.log(grades);
+    res.send(grades)
+  } catch (error) {
+      console.log(error);
+      res.send({error: 'Error, invalid data'})
+  }
 
-  if (!result) res.send("Not found").status(404);
-  else res.send(result).status(200);
+
 });
 
 // Add a score to a grade entry
