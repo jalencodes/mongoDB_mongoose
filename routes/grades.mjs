@@ -106,29 +106,39 @@ router.delete("/learner/:id", async (req, res) => {
 
 // Get a class's grade data
 router.get("/class/:id", async (req, res) => {
-  let collection = await db.collection("grades");
-  let query = { class_id: Number(req.params.id) };
-
-  // Check for learner_id parameter
-  if (req.query.learner) query.learner_id = Number(req.query.learner);
-
-  let result = await collection.find(query).toArray();
-
-  if (!result) res.send("Not found").status(404);
-  else res.send(result).status(200);
+  try {
+    const query = { class_id: req.params.id }
+    const classGrades = await Grades.find(query)
+    res.send(classGrades).status(200)
+  } catch (error) {
+    res.send({error: 'Error, invalid data'}).status(404)
+  }
 });
 
 // Update a class id
 router.patch("/class/:id", async (req, res) => {
-  let collection = await db.collection("grades");
-  let query = { class_id: Number(req.params.id) };
 
-  let result = await collection.updateMany(query, {
-    $set: { class_id: req.body.class_id },
-  });
+  try {
+    const newClassId = req.body.class_id
+    if (classFound) res.send("Class ID  already exists").status(400)
+    const query = { class_id: req.params.id }
+    const newClass = Grades.update(query, { $set: { class_id: newClassId }})
+    res.send(newClass)
 
-  if (!result) res.send("Not found").status(404);
-  else res.send(result).status(200);
+  } catch (error) {
+    res.send({error: 'Error, invalid data'}).status(404)
+  }
+
+
+  // let collection = await db.collection("grades");
+  // let query = { class_id: Number(req.params.id) };
+
+  // let result = await collection.updateMany(query, {
+  //   $set: { class_id: req.body.class_id },
+  // });
+
+  // if (!result) res.send("Not found").status(404);
+  // else res.send(result).status(200);
 });
 
 // Delete a class
