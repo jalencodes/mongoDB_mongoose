@@ -6,17 +6,19 @@ const router = express.Router();
 
 // Create a single grade entry
 router.post("/", async (req, res) => {
-  let collection = await db.collection("grades");
-  let newDocument = req.body;
-
-  // rename fields for backwards compatibility
-  if (newDocument.student_id) {
-    newDocument.learner_id = newDocument.student_id;
-    delete newDocument.student_id;
+  const newGrade = req.body
+  if(req.body.student_id){
+    newGrade.learner_id = newGrade.student_id
+    delete newGrade.student_id
   }
 
-  let result = await collection.insertOne(newDocument);
-  res.send(result).status(204);
+  try { 
+    const grade = await Grades.create(req.body)
+    res.send(grade).status(204)
+  } catch (error) {
+    res.send({error: 'Error, invalid data'}).status(404)
+  }
+
 });
 
 // Get a single grade entry
@@ -24,10 +26,10 @@ router.get("/:id", async (req, res) => {
   try {
     const grades = await Grades.findById(req.params.id)
     console.log(grades);
-    res.send(grades)
+    res.send(grades).status(200)
   } catch (error) {
       console.log(error);
-      res.send({error: 'Error, invalid data'})
+      res.send({error: 'Error, invalid data'}).status(404)
   }
 
 
