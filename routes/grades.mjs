@@ -50,15 +50,25 @@ router.patch("/:id/add", async (req, res) => {
 
 // Remove a score from a grade entry
 router.patch("/:id/remove", async (req, res) => {
-  let collection = await db.collection("grades");
-  let query = { _id: new ObjectId(req.params.id) };
 
-  let result = await collection.updateOne(query, {
-    $pull: { scores: req.body },
-  });
+  try {
+    const grade = await Grades.findById(req.params.id)
+    grade.scores.pull(req.body)
+    grade.save()
+    res.send(grade)
+  } catch (error) {
+    res.send({error: 'Error, invalid data'}).status(404)
+  }
 
-  if (!result) res.send("Not found").status(404);
-  else res.send(result).status(200);
+  // let collection = await db.collection("grades");
+  // let query = { _id: new ObjectId(req.params.id) };
+
+  // let result = await collection.updateOne(query, {
+  //   $pull: { scores: req.body },
+  // });
+
+  // if (!result) res.send("Not found").status(404);
+  // else res.send(result).status(200);
 });
 
 // Delete a single grade entry
